@@ -1,11 +1,13 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+
 from .models import Product
+from .filters import ProductFilter
+from .serializers import ProductSerializer
 
+class ProductViewSet(viewsets.ModelViewSet):
+    filterset_class = ProductFilter
 
-def index(request):
-    products = Product.objects.all()
-    return render(request, 'index.html', {'products': products})
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
-def new(request):
-    return HttpResponse("New product page")

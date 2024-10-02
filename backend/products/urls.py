@@ -1,7 +1,11 @@
-from . import views
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
+
+from .views import ProductViewSet
+
+router = SimpleRouter()
+router.register(r'products', ProductViewSet)
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('new', views.new, name='new'),
+  path('', include(router.urls)),
 ]

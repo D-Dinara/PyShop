@@ -18,21 +18,24 @@ const style = {
   p: 4,
 };
 
-interface EditModalProps {
+interface ProductModalProps {
   openEditModal: boolean;
   setOpen: (open: boolean) => void;
-  product: Product | null;
+  product?: Product | null;
   onProductUpdate: (product: Product) => void;
+  onProductCreate: (product: Product) => void;
 }
 
-export default function EditModal({ openEditModal, setOpen, product, onProductUpdate }: EditModalProps) {
+export default function ProductModal({ openEditModal, setOpen, product, onProductUpdate, onProductCreate }: ProductModalProps) {
   const [error, setError] = React.useState('');
   
-  const [editedProduct, setEditedProduct] = React.useState<Product | null>(product);
+  const [editedProduct, setEditedProduct] = React.useState<Product | null>(product || { id: 0, name: '', price: '', stock: '', image_url: '' });
 
   React.useEffect(() => {
     if (product) {
-      setEditedProduct(product);
+      setEditedProduct(product); 
+    } else {
+      setEditedProduct({ name: '', price: '', stock: '', image_url: '', id: 0 });
     }
   }, [product]);
 
@@ -43,13 +46,17 @@ export default function EditModal({ openEditModal, setOpen, product, onProductUp
     setEditedProduct(prevProduct => (prevProduct ? { ...prevProduct, [name]: value } : null));
   };
 
-  const handleEditProduct = () => {
+  const handleSubmitProduct = () => {
     if (!editedProduct) {
       setError('Product not found');
       return;
     }
-    fetch(`http://localhost:8080/products/${editedProduct.id}/`, {
-      method: 'PATCH',
+
+    const method = product ? 'PATCH' : 'POST'; 
+    const url = product ? `http://localhost:8080/products/${editedProduct.id}/` : 'http://localhost:8080/products/'; 
+
+    fetch(url, {
+      method: method,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -57,21 +64,18 @@ export default function EditModal({ openEditModal, setOpen, product, onProductUp
         name: editedProduct.name,
         price: editedProduct.price,
         stock: editedProduct.stock,
+        image_url: editedProduct.image_url,
       })
     })
-      .then(response => {
-        if (response.ok) {
-          setOpen(false);
-          onProductUpdate(editedProduct);
-        } else {
-          return response.json().then(err => {
-            throw new Error(err.message || 'Error occurred while editing the product');
-          });
-        }
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        setOpen(false);
+        product ? onProductUpdate(data) : onProductCreate(data);
       })
       .catch(error => {
         console.error('Error:', error);
-        setError('An error occurred while editing the product');
+        setError('An error occurred while editing or creating the product');
       });
   };
 
@@ -85,7 +89,7 @@ export default function EditModal({ openEditModal, setOpen, product, onProductUp
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2" margin={1}>
-            Edit Product
+            {product ? 'Edit Product' : 'Add Product'}
           </Typography>
           {error && (
             <Typography variant="body1" color="error">
@@ -94,12 +98,15 @@ export default function EditModal({ openEditModal, setOpen, product, onProductUp
           )}
           {editedProduct && 
             <Box
+              display='flex'
+              flexDirection='column'
               component="form"
               sx={{ '& .MuiTextField-root': { m: 1, width: '25ch' } }}
               noValidate
-              autoComplete="off"
+              autoComplete="true"
               >
               <TextField
+                fullWidth
                 required
                 id="name"
                 label="Name"
@@ -108,6 +115,7 @@ export default function EditModal({ openEditModal, setOpen, product, onProductUp
                 onChange={handleInputChange}
               />
               <TextField
+                fullWidth
                 required
                 id="price"
                 label="Price"
@@ -116,6 +124,7 @@ export default function EditModal({ openEditModal, setOpen, product, onProductUp
                 onChange={handleInputChange}
               />
               <TextField
+                fullWidth
                 required
                 id="stock"
                 label="Stock"
@@ -123,8 +132,17 @@ export default function EditModal({ openEditModal, setOpen, product, onProductUp
                 value={editedProduct.stock}
                 onChange={handleInputChange}
               />
-              <Button onClick={handleEditProduct} variant="contained" color="primary" type='button'>
-                Update
+              <TextField
+                fullWidth
+                required
+                id="image_url"
+                label="Image URL"
+                name='image_url'
+                value={editedProduct.image_url}
+                onChange={handleInputChange}
+              />
+              <Button onClick={handleSubmitProduct} variant="contained" color="primary" type='button'>
+                {product ? 'Update' : 'Add'}
               </Button>
             </Box>
           }

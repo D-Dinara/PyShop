@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Box, Typography, Alert, Button } from '@mui/material';
 import './App.css';
-import EditModal from './EditModal';
+import ProductModal from './ProductModal';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ModeEditOutlineIcon from '@mui/icons-material/ModeEditOutline';
 
 export interface Product {
   id: number;
@@ -34,6 +36,9 @@ function App() {
     })
       .then(response => response.json())
       .then(data => {
+        if (!data.results) {
+          throw new Error('Products not found');
+        }
         setProducts(prevProducts => [...prevProducts, ...data.results]); 
         setHasMore(data.next !== null);
       })
@@ -99,6 +104,15 @@ function App() {
     );
   };
 
+  const handleAddProduct = () => {
+    setSelectedProduct(null);
+    setOpenEditModal(true);
+  }
+
+  const handleProductCreate = (newProduct: Product) => {
+    setProducts(prevProducts => [newProduct, ...prevProducts]);
+  }
+
   return (
     <Box padding={4} display='flex' flexDirection='column' justifyContent='center' alignItems='center'>
       <Typography variant="h4" gutterBottom >
@@ -126,7 +140,7 @@ function App() {
                   <TableCell>Name</TableCell>
                   <TableCell>Price</TableCell>
                   <TableCell>In Stock</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell align='center'>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -140,16 +154,16 @@ function App() {
                     <TableCell>{product.price}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>
-                      <Button size='small' style={{marginRight: 10}} variant="contained" color="error" onClick={() => handleDeleteProduct(product.id)}>Delete</Button>
-                      <Button size='small' variant="contained" color="primary" onClick={() => handleOpenEditModal(product)}>Edit</Button>
+                      <DeleteIcon color='error' cursor='pointer' onClick={() => handleDeleteProduct(product.id)} />
+                      <ModeEditOutlineIcon color='primary' cursor='pointer'  onClick={() => handleOpenEditModal(product)} />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>  
-          <EditModal openEditModal={openEditModal} setOpen={setOpenEditModal} product={selectedProduct}  onProductUpdate={handleProductUpdate} />
-          <Button style={{marginTop: 10}} variant="contained" color="primary" onClick={() => console.log('Add Product')}>Add Product</Button>
+          <ProductModal openEditModal={openEditModal} setOpen={setOpenEditModal} product={selectedProduct}  onProductUpdate={handleProductUpdate} onProductCreate={handleProductCreate} />
+          <Button style={{marginTop: 10}} variant="contained" color="primary" onClick={handleAddProduct}>Add Product</Button>
         </>
       }
 

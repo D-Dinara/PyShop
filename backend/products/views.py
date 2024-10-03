@@ -7,6 +7,7 @@ from .serializers import ProductSerializer
 
 class ProductViewSet(viewsets.ModelViewSet):
     filterset_class = ProductFilter
+    filter_backends = [DjangoFilterBackend]
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer

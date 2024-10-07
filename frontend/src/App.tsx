@@ -4,6 +4,7 @@ import './App.css';
 import ProductModal from './ProductModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditOutlineIcon from '@mui/icons-material/ModeEditOutline';
+import { debounce } from 'lodash';
 
 export interface Product {
   id: number;
@@ -46,7 +47,7 @@ function App() {
     }
 
     try {
-      const response = await fetch(`${baseURL}?${filterParams}page=${page}`, {
+      const response = await fetch(`${baseURL}?${filterParams}page=${pageNumber}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -76,21 +77,24 @@ function App() {
   };
 
   useEffect(() => {
-    fetchProducts(1);
-  }, [page]);
-
-  const handleTableScroll = () => {
+    if (hasMore && !loading) {
+      fetchProducts(page);
+    }
+  }, [page, hasMore]); 
+  
+  
+  const handleTableScroll = debounce(() => {
     const table = tableRef.current;
     if (table) {
       const { scrollTop, scrollHeight, clientHeight } = table;
       scrollPositionRef.current = scrollTop;
-      if (scrollTop + clientHeight >= scrollHeight - 10) {
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
         if (hasMore && !loading) {
           setPage(prevPage => prevPage + 1);
         }
       }
     }
-  };
+  }, 200); // Debounce the scroll event
 
   useEffect(() => {
     if (tableRef.current) {

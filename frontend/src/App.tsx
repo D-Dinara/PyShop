@@ -8,40 +8,47 @@ import ModeEditOutlineIcon from '@mui/icons-material/ModeEditOutline';
 export interface Product {
   id: number;
   name: string;
-  price: string;
+  price: number;
   image_url: string;
-  stock: string;
+  stock: number;
 }
 
 const baseURL = 'http://localhost:8080/products';
 
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [filterQuery, setFilterQuery] = useState<string>(''); // State for the filter input
-  const [filterField, setFilterField] = useState<string>('name'); // State for selected filter field
+  const [filterName, setFilterName] = useState<string>(''); // State for the filter input
+  const [filterPriceMin, setFilterPriceMin] = useState<string>(''); // State for the min price filter
+  const [filterPriceMax, setFilterPriceMax] = useState<string>(''); // State for the max price filter
 
   const tableRef = useRef<HTMLDivElement | null>(null);
   const scrollPositionRef = useRef<number>(0);
 
   const fetchProducts = async (pageNumber: number) => {
+  // const fetchProducts = async () => {
     if (loading) return;
     setLoading(true);
 
-    // Build the query parameters for filtering
     let filterParams = '';
-    if (filterQuery) {
-      filterParams = `&${filterField}=${filterQuery}`;
+    if (filterName) {
+      filterParams += `name=${filterName}&`;
+    }
+    if (filterPriceMin !== '') {
+      filterParams += `price_min=${filterPriceMin}&`;
+    }
+    if (filterPriceMax !== '') {
+      filterParams += `price_max=${filterPriceMax}&`;
     }
 
     try {
-      const response = await fetch(`${baseURL}?page=${pageNumber}${filterParams}`, {
+      // const response = await fetch(`${baseURL}?page=${pageNumber}${filterParams}`, {
+      const response = await fetch(`${baseURL}?${filterParams}page=${page}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -54,13 +61,15 @@ function App() {
 
       const data = await response.json();
 
-      console.log('Data:', data);
+      console.log('Data:', data.results);
 
-      if (!data.results) {
+      if (!data) {
         throw new Error('Products not found');
       }
 
-      setFilteredProducts(data.results);
+      //add products to the prev filtered products
+      setProducts(prevProducts => [...prevProducts, ...data.results]);
+      // setProducts(data.results);
       setHasMore(data.next !== null);
     } catch (error) {
       console.error('Error:', error);
@@ -71,8 +80,8 @@ function App() {
   };
 
   useEffect(() => {
-    fetchProducts(page);
-  }, [page, filterQuery]);
+    fetchProducts(1);
+  }, [page]);
 
   const handleTableScroll = () => {
     const table = tableRef.current;
@@ -139,6 +148,12 @@ function App() {
     fetchProducts(1);
   };
 
+  const handleFilter = () => {
+    setProducts([]);  // Clear previous products
+    setPage(1);       // Reset to page 1
+    fetchProducts(1);
+  };
+
   return (
     <Box padding={4} display='flex' flexDirection='column' justifyContent='center' alignItems='center'>
       <Typography variant="h4" gutterBottom>
@@ -147,29 +162,37 @@ function App() {
 
       {/* Filter selection */}
       <Box display="flex" justifyContent="center" gap={2} marginBottom={3}>
-        {/* Dropdown to pick filter field */}
-        <FormControl variant="outlined" style={{ minWidth: 200 }}>
-          <InputLabel id="filter-field-label">Filter By</InputLabel>
-          <Select
-            labelId="filter-field-label"
-            value={filterField}
-            onChange={(e) => setFilterField(e.target.value)}
-            label="Filter By"
-          >
-            <MenuItem value="name">Name</MenuItem>
-            <MenuItem value="price">Price</MenuItem>
-            <MenuItem value="stock">Stock</MenuItem>
-          </Select>
-        </FormControl>
 
         {/* TextField to input filter query */}
+
+        {/* if filter by name, enter name */}
         <TextField
-          label="Enter Filter Query"
+          label="Filter by name"
           variant="outlined"
-          value={filterQuery}
-          onChange={(e) => setFilterQuery(e.target.value)}
+          value={filterName}
+          onChange={(e) => setFilterName(e.target.value)}
           style={{ minWidth: 400 }}
         />
+
+        {/* if filter by price, enter price range*/}
+        <>  
+          <TextField
+            label="Enter Min Price"
+            variant="outlined"
+            value={filterPriceMin}
+            onChange={(e) => setFilterPriceMin(e.target.value)}
+            style={{ minWidth: 200 }}
+          />
+          <TextField
+            label="Enter Max Price"
+            variant="outlined"
+            value={filterPriceMax}
+            onChange={(e) => setFilterPriceMax(e.target.value)}
+            style={{ minWidth: 200 }}
+          />
+        </>
+
+        <Button variant="contained" color="primary" onClick={handleFilter}>Filter</Button>
       </Box>
 
       {error && (
@@ -197,7 +220,7 @@ function App() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       <img src={product.image_url} alt={product.name} style={{ width: 50, height: 50 }} />
@@ -215,7 +238,7 @@ function App() {
               </TableBody>
             </Table>
           </TableContainer>
-          <ProductModal openEditModal={openEditModal} setOpen={setOpenEditModal} product={selectedProduct} onProductUpdate={handleProductUpdate} onProductCreate={handleProductCreate} />
+          <ProductModal open={openEditModal} setOpen={setOpenEditModal} product={selectedProduct} onProductUpdate={handleProductUpdate} onProductCreate={handleProductCreate} />
           <Button style={{ marginTop: 10 }} variant="contained" color="primary" onClick={handleAddProduct}>Add Product</Button>
         </>
       )}

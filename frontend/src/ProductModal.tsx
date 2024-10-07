@@ -15,7 +15,7 @@ const style = {
 };
 
 interface ProductModalProps {
-  openEditModal: boolean;
+  open: boolean;
   setOpen: (open: boolean) => void;
   product?: Product | null;
   onProductUpdate: (product: Product) => void;
@@ -24,21 +24,21 @@ interface ProductModalProps {
 
 const baseURL = 'http://localhost:8080/products';
 
-export default function ProductModal({ openEditModal, setOpen, product, onProductUpdate, onProductCreate }: ProductModalProps) {
+export default function ProductModal({ open, setOpen, product, onProductUpdate, onProductCreate }: ProductModalProps) {
   const [error, setError] = React.useState('');
-  const [editedProduct, setEditedProduct] = React.useState<Product | null>(product || { id: 0, name: '', price: '', stock: '', image_url: '' });
+  const [editedProduct, setEditedProduct] = React.useState<Product | null>(product || { id: 0, name: '', price: 0, stock: 0, image_url: '' });
 
   React.useEffect(() => {
     if (product) {
       setEditedProduct(product);
     } else {
-      setEditedProduct({ id: 0, name: '', price: '', stock: '', image_url: '' });
+      setEditedProduct({ id: 0, name: '', price: 0, stock: 0, image_url: '' });
     }
   }, [product]);
 
   const handleClose = () => {
     setOpen(false);
-    setEditedProduct({ id: 0, name: '', price: '', stock: '', image_url: '' }); // Reset after close
+    setEditedProduct({ id: 0, name: '', price: 0, stock: 0, image_url: '' }); // Reset after close
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +80,7 @@ export default function ProductModal({ openEditModal, setOpen, product, onProduc
 
   return (
     <Modal
-      open={openEditModal}
+      open={open}
       onClose={handleClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"

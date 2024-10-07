@@ -31,7 +31,6 @@ function App() {
   const scrollPositionRef = useRef<number>(0);
 
   const fetchProducts = async (pageNumber: number) => {
-  // const fetchProducts = async () => {
     if (loading) return;
     setLoading(true);
 
@@ -47,7 +46,6 @@ function App() {
     }
 
     try {
-      // const response = await fetch(`${baseURL}?page=${pageNumber}${filterParams}`, {
       const response = await fetch(`${baseURL}?${filterParams}page=${page}`, {
         method: 'GET',
         headers: {
@@ -67,9 +65,7 @@ function App() {
         throw new Error('Products not found');
       }
 
-      //add products to the prev filtered products
       setProducts(prevProducts => [...prevProducts, ...data.results]);
-      // setProducts(data.results);
       setHasMore(data.next !== null);
     } catch (error) {
       console.error('Error:', error);
@@ -149,8 +145,8 @@ function App() {
   };
 
   const handleFilter = () => {
-    setProducts([]);  // Clear previous products
-    setPage(1);       // Reset to page 1
+    setProducts([]);  
+    setPage(1);      
     fetchProducts(1);
   };
 
@@ -160,12 +156,8 @@ function App() {
         Products
       </Typography>
 
-      {/* Filter selection */}
       <Box display="flex" justifyContent="center" gap={2} marginBottom={3}>
 
-        {/* TextField to input filter query */}
-
-        {/* if filter by name, enter name */}
         <TextField
           label="Filter by name"
           variant="outlined"
@@ -174,7 +166,6 @@ function App() {
           style={{ minWidth: 400 }}
         />
 
-        {/* if filter by price, enter price range*/}
         <>  
           <TextField
             label="Enter Min Price"
@@ -191,7 +182,6 @@ function App() {
             style={{ minWidth: 200 }}
           />
         </>
-
         <Button variant="contained" color="primary" onClick={handleFilter}>Filter</Button>
       </Box>
 

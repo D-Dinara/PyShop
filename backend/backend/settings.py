@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'products.apps.ProductsConfig',
+    'api.apps.ApiConfig',
     "django_filters",
     "rest_framework",
     'corsheaders',
@@ -141,3 +142,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+#Security settings
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_HTTPONLY = True
+
+# For production, set these lines to True :
+# CSRF_COOKIE_HTTPONLY = True
+# SESSION_COOKIE_HTTPONLY = True

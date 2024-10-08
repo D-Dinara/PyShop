@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Box, Typography, Alert, Button, TextField, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Box, Typography, Alert, Button, TextField, MenuItem, Select, InputLabel, FormControl, Slider } from '@mui/material';
 import './App.css';
 import ProductModal from './ProductModal';
 import DeleteIcon from '@mui/icons-material/Delete';

@@ -32,8 +32,19 @@ CORS_ALLOWED_ORIGINS = [
   'http://localhost:3000',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+  'http://localhost:3001',
+  'http://localhost:3000',
+]
 
-CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'authorization',
+    'content-type',
+    'x-csrftoken',  
+]
+
 
 CORS_ALLOW_METHODS = ["*"]
 

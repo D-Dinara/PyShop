@@ -5,6 +5,7 @@ import ProductModal from './ProductModal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditOutlineIcon from '@mui/icons-material/ModeEditOutline';
 import { debounce } from 'lodash';
+import LoginPage from './LoginPage';
 
 export interface Product {
   id: number;
@@ -59,8 +60,6 @@ function App() {
       }
 
       const data = await response.json();
-
-      console.log('Data:', data.results);
 
       if (!data) {
         throw new Error('Products not found');
@@ -156,6 +155,7 @@ function App() {
 
   return (
     <Box padding={4} display='flex' flexDirection='column' justifyContent='center' alignItems='center'>
+      <LoginPage />
       <Typography variant="h4" gutterBottom>
         Products
       </Typography>
